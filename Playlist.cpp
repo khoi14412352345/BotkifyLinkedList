@@ -39,7 +39,7 @@ string Song::toString() const
 // =======================
 
 Playlist::Playlist(string name)
-    : name(name), currentIndex(0) {}
+    : name(name), currentIndex(-1) {}
 
 int Playlist::size() const
 {
@@ -59,7 +59,7 @@ void Playlist::clear()
         Song* song = lstSong.removeAt(0);
         delete song;
     }
-    currentIndex = 0;
+    currentIndex = -1;
 }
 
 void Playlist::addSong(Song* s)
@@ -71,7 +71,18 @@ void Playlist::removeSong(int index)
 {
     Song* song = lstSong.removeAt(index);
     delete song;
-    if (currentIndex >= lstSong.size() && currentIndex > 0)
+
+    if (lstSong.empty())
+    {
+        currentIndex = -1;
+        return;
+    }
+
+    if (index < currentIndex)
+    {
+        currentIndex--;
+    }
+    else if (currentIndex >= lstSong.size())
     {
         currentIndex = lstSong.size() - 1;
     }
@@ -93,7 +104,15 @@ Song* Playlist::playNext()
         throw out_of_range("Index is invalid!");
     }
 
-    currentIndex = (currentIndex + 1) % lstSong.size();
+    if (currentIndex < 0 || currentIndex >= lstSong.size() - 1)
+    {
+        currentIndex = 0;
+    }
+    else
+    {
+        currentIndex++;
+    }
+
     return lstSong.get(currentIndex);
 }
 
@@ -104,8 +123,7 @@ Song* Playlist::playPrevious()
         throw out_of_range("Index is invalid!");
     }
 
-    // move index backwards first, then return the song at new position
-    if (currentIndex == 0)
+    if (currentIndex <= 0)
     {
         currentIndex = lstSong.size() - 1;
     }
